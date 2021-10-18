@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/env/bin bash
 
 SOURCE_SOCKET=${1:-"/var/run/docker-host.sock"}
 TARGET_PORT=${2:-"9256"}
