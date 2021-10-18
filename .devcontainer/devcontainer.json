@@ -3,7 +3,7 @@
 	"build": {
 		"dockerfile": "Dockerfile"
 	},
-	"runArgs": [ "--network", "host" ],
+	"runArgs": [ "--network", "host", "--label", "com.github.codespaces.active.workspace=true" ],
 	"mounts": [ "source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind" ],
 	"forwardPorts": [ 9256 ],
 	"portsAttributes": {

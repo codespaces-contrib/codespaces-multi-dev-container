@@ -35,6 +35,8 @@ local_target_base_folder="${temp_dir}/${DOT_DEVCONTAINER_PARENT_DIR}"
 mkdir -p "${local_target_base_folder}"
 docker cp -L "${workspace_container}:${workspace_folder_in_container}/${DOT_DEVCONTAINER_PARENT_DIR}/.devcontainer" "${local_target_base_folder}"
 
+export SECONDARY_CODESPACE_CONTAINER=true
+
 echo
 echo "Launching VS Code..."
 code --force-user-env --disable-workspace-trust --skip-add-to-recently-opened "${local_target_base_folder}"
