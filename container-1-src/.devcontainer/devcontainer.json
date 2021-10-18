@@ -1,0 +1,12 @@
+{
+    "name": "Container 1",
+    "build": {
+      "dockerfile": "Dockerfile"
+    },
+    "runArgs": [ "--network", "host" ],
+
+    // Add the IDs of extensions you want installed when the container is created.
+    "extensions": ["dbaeumer.vscode-eslint"],
+
+    "remoteUser": "node"
+  }
