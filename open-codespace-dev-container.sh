@@ -36,6 +36,8 @@ target_base_folder="${temp_dir}/${DEVCONTAINER_BASE_FOLDER}"
 mkdir -p "${target_base_folder}"
 docker cp -L "${workspace_container}:${workspace_folder_in_container}/${DEVCONTAINER_BASE_FOLDER}/.devcontainer" "${target_base_folder}"
 
+export SECONDARY_CODESPACE_CONTAINER=true
+
 echo
 echo "Launching VS Code..."
 code --force-user-env --disable-workspace-trust --skip-add-to-recently-opened "${target_base_folder}"
