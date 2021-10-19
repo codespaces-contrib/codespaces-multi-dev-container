@@ -3,8 +3,9 @@
 	"build": {
 		"dockerfile": "Dockerfile"
 	},
+    "overrideCommand": false,
+    "mounts": [ "source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind" ],
 	"runArgs": [ "--network", "host", "--label", "com.github.codespaces.active.workspace=true" ],
-	"mounts": [ "source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind" ],
 	"forwardPorts": [ 9256 ],
 	"portsAttributes": {
 		"9256": {
@@ -13,6 +14,6 @@
 			"requireLocalPort": true
 		}
 	},
-	"postStartCommand": "forward-docker-socket",
-	"remoteUser": "vscode"
+	"postStartCommand": "bash .devcontainer/store-source-location.sh",
+	"remoteUser": "node"
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-SOURCE_SOCKET=${1:-"/var/run/docker-host.sock"}
-TARGET_PORT=${2:-"9256"}
+SOURCE_SOCKET="/var/run/docker.sock"
+TARGET_PORT="9256"
 
 # Wrapper function to only use sudo if not already root
 sudoIf()
@@ -16,6 +16,5 @@ sudoIf()
 # Set up socket forwader
 sudoIf nohup bash -c "socat TCP-LISTEN:${TARGET_PORT},fork,bind=127.0.0.1 UNIX-CONNECT:${SOURCE_SOCKET} > /tmp/socat.log 2>&1 &" > /dev/null 2>&1
 
-# Add workspace path to temp file
-echo "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)" > /tmp/__boostrap_container_workspace_folder
-
+set +e
+exec "$@"
