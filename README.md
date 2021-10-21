@@ -2,7 +2,7 @@
 
 Visual Studio Code Remote - Containers supports [a pattern](https://code.visualstudio.com/remote/advancedcontainers/connect-multiple-containers) that allows the use of multiple development containers at the same time for a source tree. Unfortunatley [GitHub Codespaces](https://github.com/features/codespaces) does not currently support attaching a second window to a different container in the same Codespaces. However, the fact that the same technology is used in both Remote - Containers and Codespaces allows you to use the Remote - Containers extension with a Codespace to achieve the same goal with some subtle tweaks.
 
-This variation of the pattern enables you to spin up completely separate dev containers in the same Codespaace without unifying everything in a Docker Compose file. If you'd prefer to use Docker Compose instead, [see this variation](https://github.com/chuxel/codespaces-multi-dev-container).
+This variation of the pattern enables you to spin up completely separate dev containers in the same Codespaace without unifying everything in a Docker Compose file. If you'd prefer to use Docker Compose instead, [see this variation](https://github.com/chuxel/codespaces-multi-dev-container-compose).
 
 Codespaces will ultimately have first class support for this partern, so this is a workaround given current limitations.
 
@@ -12,7 +12,7 @@ Codespaces will ultimately have first class support for this partern, so this is
 2. Install the [GitHub Codespaces](https://marketplace.visualstudio.com/items?itemName=GitHub.codespaces) extension in local VS Code
 3. Install the [VS Code Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension in local VS Code
 4. Install Docker locally
-5. Install `jq`
+5. Install `jq`:
   - macOS: `brew install jq`
   - Linux: Use your distro's package manger to install. For example, `sudo apt-get install jq`
 
@@ -39,7 +39,7 @@ This sample applies the same [patterns](https://code.visualstudio.com/remote/adv
 2. If your new container relies on contents outside of the `.devcontainer` folder (particularly if common across all containers), add them to `common-config.list` in the root of the repository. This ensures they are copied down locally so the buld can function as expected.
 3. For multi-repo scenarios, you can setup the "bootstrap" container (in the root `.devcontainer` folder) to clone repositories as described in [this sample](https://github.com/Chuxel/codespaces-multi-repo) instead.
 
-Note that if you are using a Docker Compose file or would prefer to have all containers start up at once, see [this variation instead](https://github.com/chuxel/codespaces-multi-dev-container) for an alternate approach.
+Note that if you are using a Docker Compose file or would prefer to have all containers start up at once, see [this variation instead](https://github.com/chuxel/codespaces-multi-dev-container-compose) for an alternate approach.
 
 ## TODOs
 
