@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:0-16-bullseye
 
 # Docker script also installs socat which we'll use
 ENV DOCKER_BUILDKIT=1
-COPY forward-docker-socket.sh script-library/docker-debian.sh /tmp/
+COPY forward-docker-socket.sh library-scripts/docker-debian.sh /tmp/
 RUN bash /tmp/docker-debian.sh \
     && su node -c 'npm install -g @vscode/dev-container-cli' \
     && mv /tmp/forward-docker-socket.sh /usr/local/share/forward-docker-socket.sh \
