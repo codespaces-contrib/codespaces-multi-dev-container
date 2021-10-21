@@ -84,5 +84,5 @@ echo "Launching VS Code..."
 code --force-user-env --disable-workspace-trust --skip-add-to-recently-opened "${temp_devcontainer_folder}"
 echo "Done!"
 echo
-echo "Press F1 or Cmd/Ctrl+Shift+P and select the Remote-Containers: Reopen in Container in the ew VS Code window to connect."
+echo "Press F1 or Cmd/Ctrl+Shift+P and select the Remote-Containers: Reopen in Container in the new VS Code window to connect."
 echo
