@@ -2,9 +2,9 @@
 
 Visual Studio Code Remote - Containers supports [a pattern](https://code.visualstudio.com/remote/advancedcontainers/connect-multiple-containers) that allows the use of multiple development containers at the same time for a source tree. Unfortunatley [GitHub Codespaces](https://github.com/features/codespaces) does not currently support attaching a second window to a different container in the same Codespaces. However, the fact that the same technology is used in both Remote - Containers and Codespaces allows you to use the Remote - Containers extension with a Codespace to achieve the same goal with some subtle tweaks.
 
-This variation of the pattern enables you to spin up completely separate dev containers in the same Codespaace without unifying everything in a Docker Compose file. If you'd prefer to use Docker Compose instead, [see this variation](https://github.com/chuxel/codespaces-multi-dev-container-compose).
+This variation of the pattern enables you to spin up completely separate dev containers in the same codespace without unifying everything in a single Docker Compose file. If you'd prefer to spin everything up at once using Docker Compose, [see this variation instead](https://github.com/chuxel/codespaces-multi-dev-container-compose).
 
-Codespaces will ultimately have first class support for this partern, so this is a workaround given current limitations.
+Codespaces will ultimately have first class support for this pattern, so this is a workaround given current limitations.
 
 ## Setup
 
@@ -19,15 +19,20 @@ Codespaces will ultimately have first class support for this partern, so this is
 ## Using this sample
 
 1. Create a codespace from this repository from VS Code client locally (<kbd>F1</kbd> or <kbd>ctrl</kbd>+<kbd>shift</kbd>+<kbd>p</kbd>, select **Codesaces: Create New Codespace**, enter this repository)
-2. In this Codespace, open a terminal and run the command `keep-me-alive`.
-2. Next, copy `open-codespace-dev-container.sh` to your local machine.
-3. Open a terminal and use the script to set up a connection to one of the sub-folders in this repository. For example:
+
+    > Note: If you accidentally created the Codespace from the web, you can open it in VS Code client after things are up and running if you prefer.
+
+2. In this Codespace, open a terminal and run the command: `keep-me-alive`
+
+3. Next, copy `open-codespace-dev-container.sh` to your local machine.
+
+4. Open a **local** terminal and use the script to set up a connection to one of the sub-folders in this repository. For example:
 
     ```bash
-    ./open-codespace-dev-container.sh container-1-src
+    bash open-codespace-dev-container.sh container-1-src
     ```
   
-4. In the VS Code window that appears, click **Reopen in Container** when a notification appears.
+5. In the VS Code window that appears, click **Reopen in Container** when a notification appears.
 
 In a bit, this new window will be using the development container for this folder.
 
@@ -44,7 +49,8 @@ Note that if you are using a Docker Compose file or would prefer to have all con
 ## TODOs
 
 There are few to-dos for this sample:
-2. Create a PowerShell version of the `open-codespace-dev-container.sh` script for Windows.
-3. Cache VS Code Server between development containers to avoid having to download it multiple times.
-4. Look for ways to further reduce steps.
-5. Update the Remote - Containers documentation to describe the pattern this way.
+
+1. Create a PowerShell version of the `open-codespace-dev-container.sh` script for Windows.
+2. Cache VS Code Server between development containers to avoid having to download it multiple times.
+3. Look for ways to further reduce steps.
+4. Update the Remote - Containers documentation to describe the pattern this way.
