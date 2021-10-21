@@ -42,7 +42,7 @@ temp_dir="$(pwd)/._devcontainer_temp"
 mkdir -p "${temp_dir}"
 cat << 'EOF' > "${temp_dir}/.gitignore"
 *
-../._devcontainer_temp
+.
 EOF
 echo "Temp directory: ${temp_dir}"
 temp_devcontainer_folder="${temp_dir}/${devcontainer_relative_path}"
@@ -59,12 +59,11 @@ done < common-config.list
 echo "- ${devcontainer_relative_path}/.devcontainer"
 docker cp -L "${bootstrap_container}:${workspace_folder_in_container}/${devcontainer_relative_path}/.devcontainer" "${temp_devcontainer_folder}"
 
-# Append workspace mount property if not a docker compose definition
-temp_evcontainerjson_file="${temp_devcontainer_folder}/.devcontainer/devcontainer.json"
 # Remove comments given devcontainer.json is a jsonc file
+temp_evcontainerjson_file="${temp_devcontainer_folder}/.devcontainer/devcontainer.json"
 sed -i'.bak' -e "s/\\/\\/.*/ /g" "${temp_evcontainerjson_file}"
+# Append workspace mount property if not a docker compose definition
 if ! jq -e '.dockerComposeFile' "${temp_evcontainerjson_file}" >/dev/null 2>&1; then
-    # Update properties
     jq  --arg workspaceFolder "${workspace_folder_in_container}/${devcontainer_relative_path}" \
         --arg workspaceMount "source=${workspace_mount_source},destination=/workspaces,type=bind" \
         '.workspaceFolder = $workspaceFolder | .workspaceMount = $workspaceMount' \
