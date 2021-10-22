@@ -1,4 +1,4 @@
-# GitHub Codespaces Multi-Development Container
+# Using GitHub Codespaces with Multiple Development Containers
 
 Visual Studio Code Remote - Containers supports [a pattern](https://code.visualstudio.com/remote/advancedcontainers/connect-multiple-containers) that allows the use of multiple development containers at the same time for a source tree. Unfortunately [GitHub Codespaces](https://github.com/features/codespaces) does not currently support attaching a second window to a different container in the same Codespaces. However, the fact that the same technology is used in both Remote - Containers and Codespaces allows you to use the Remote - Containers extension with a codespace to achieve the same goal with some subtle tweaks.
 
@@ -8,11 +8,12 @@ Codespaces will ultimately have first class support for this pattern, so this is
 
 ## Setup
 
-1. Install VS Code locally
-2. Install the [GitHub Codespaces](https://marketplace.visualstudio.com/items?itemName=GitHub.codespaces) extension in local VS Code
-3. Install the [VS Code Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension in local VS Code
-4. Install the Docker CLI locally (e.g. by installing Docker Desktop - though Docker itself does not need to be running)
-5. On macOS or Linux, install `jq` locally:
+1. Install [VS Code](https://code.visualstudio.com/) (stable) locally
+2. On macOS, follow the needed steps to [add `code` to your local `PATH`](https://code.visualstudio.com/docs/setup/mac#_launching-from-the-command-line). (This should already be done by default on a typical Windows/Linux install.)
+3. Install the [GitHub Codespaces](https://marketplace.visualstudio.com/items?itemName=GitHub.codespaces) extension in local VS Code
+4. Install the [VS Code Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension in local VS Code
+5. Install the Docker CLI locally (e.g. by installing Docker Desktop - though Docker itself does not need to be running)
+6. On macOS or Linux, install `jq` locally:
     - macOS: `brew install jq`
     - Linux: Use your distro's package manger to install. For example, `sudo apt-get install jq`
 
