@@ -12,7 +12,7 @@ Codespaces will ultimately have first class support for this pattern, so this is
 2. On macOS, follow the needed steps to [add `code` to your local `PATH`](https://code.visualstudio.com/docs/setup/mac#_launching-from-the-command-line). (This should already be done by default on a typical Windows/Linux install.)
 3. Install the [GitHub Codespaces](https://marketplace.visualstudio.com/items?itemName=GitHub.codespaces) extension in local VS Code
 4. Install the [VS Code Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension in local VS Code
-5. Install the Docker CLI locally (e.g. by installing Docker Desktop - though Docker itself does not need to be running)
+5. Install the Docker CLI locally (e.g. by installing Docker Desktop, but Docker does not need to be running)
 6. On macOS or Linux, install `jq` locally:
     - macOS: `brew install jq`
     - Linux: Use your distro's package manger to install. For example, `sudo apt-get install jq`
