@@ -23,23 +23,22 @@ Codespaces will ultimately have first class support for this pattern, so this is
     > Note: If you accidentally created the codespace from the web, you can open it in VS Code client after things are up and running if you prefer.
 
 2. In this codespace, open a terminal and run the command: `keep-me-alive`
-<!--
-3. On Windows, be sure the **Remote - Containers: Execute in WSL** user setting is **Unchecked** (`"remote.containers.executeInWSL": false` in `settings.json`).
--->
 
-4. Next, copy `open-codespace-dev-container.sh`<!-- (macOS / Linux) or `open-codespace-dev-container.ps1` and `open-codespace-dev-container.cmd` (Windows) --> to your local machine.
+3. On Windows, be sure the **Remote - Containers: Execute in WSL** user setting is **Unchecked** (`"remote.containers.executeInWSL": false` in `settings.json`).
+
+4. Next, copy `open-codespace-dev-container.sh` (macOS / Linux) or `open-codespace-dev-container.ps1` and `open-codespace-dev-container.cmd` (Windows) to your local machine.
 
 5. In a **local** terminal, use the script to set up a connection to one of the sub-folders in this repository. For example, on macOS / Linux:
 
     ```bash
     bash open-codespace-dev-container.sh container-1-src
     ```
-  <!--
+
     ... or on Windows, use PowerShell/Command Prompt (not WSL) as follows:
     ```powershell
     .\open-codespace-dev-container.cmd container-1-src
     ```
--->
+
 5. In the VS Code window that appears, click **Reopen in Container** when a notification appears.
 
 In a bit, this new window will be using the development container for this folder.
@@ -58,7 +57,6 @@ Note that if you are using a Docker Compose file or would prefer to have all con
 
 There are few to-dos for this sample:
 
-1. Create a PowerShell version of the `open-codespace-dev-container.sh` script for Windows.
-2. Cache VS Code Server between development containers to avoid having to download it multiple times.
-3. Look for ways to further reduce steps.
+1. Cache VS Code Server between development containers to avoid having to download it multiple times.
+2. Look for ways to further reduce steps.
 
