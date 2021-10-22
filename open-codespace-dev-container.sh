@@ -45,19 +45,19 @@ echo "Temp dev container path: ${temp_devcontainer_folder}"
 # Copy config files
 echo
 echo "Copying:"
+echo "- ${devcontainer_relative_path}/.devcontainer"
+docker cp -L "${bootstrap_container}:${workspace_folder_in_container}/${devcontainer_relative_path}/.devcontainer" "${temp_devcontainer_folder}"
 while IFS= read -r content_path; do
     echo "- ${content_path}"
     docker cp -L "${bootstrap_container}:${workspace_folder_in_container}/${content_path}" "${temp_dir}" 2>/dev/null || echo "   (Skipped, does not exist.)"
 done < common-config.list
-echo "- ${devcontainer_relative_path}/.devcontainer"
-docker cp -L "${bootstrap_container}:${workspace_folder_in_container}/${devcontainer_relative_path}/.devcontainer" "${temp_devcontainer_folder}"
 echo
 
 # Remove comments given devcontainer.json is a jsonc file
-temp_evcontainerjson_file="${temp_devcontainer_folder}/.devcontainer/devcontainer.json"
-sed -i'.bak' -e "s/\\/\\/.*/ /g" "${temp_evcontainerjson_file}"
+temp_devcontainerjson_file="${temp_devcontainer_folder}/.devcontainer/devcontainer.json"
+sed -i'.bak' -e "s/\\/\\/.*/ /g" "${temp_devcontainerjson_file}"
 # Append workspace mount property if not a docker compose definition
-if ! jq -e '.dockerComposeFile' "${temp_evcontainerjson_file}" >/dev/null 2>&1; then
+if ! jq -e '.dockerComposeFile' "${temp_devcontainerjson_file}" >/dev/null 2>&1; then
     # Find the workspace mount point on the host
     workspace_mount_source="$(docker inspect -f '{{range .HostConfig.Mounts}}{{if eq .Target "/workspaces"}}{{.Source}}{{end}}{{end}}' ${bootstrap_container})"
     if [ -z "${workspace_mount_source}" ]; then
@@ -68,8 +68,8 @@ if ! jq -e '.dockerComposeFile' "${temp_evcontainerjson_file}" >/dev/null 2>&1; 
     jq  --arg workspaceFolder "${workspace_folder_in_container}/${devcontainer_relative_path}" \
         --arg workspaceMount "source=${workspace_mount_source},destination=/workspaces,type=bind" \
         '.workspaceFolder = $workspaceFolder | .workspaceMount = $workspaceMount' \
-        "${temp_evcontainerjson_file}" > "${temp_evcontainerjson_file}.new"
-    mv -f "${temp_evcontainerjson_file}.new" "${temp_evcontainerjson_file}"
+        "${temp_devcontainerjson_file}" > "${temp_devcontainerjson_file}.new"
+    mv -f "${temp_devcontainerjson_file}.new" "${temp_devcontainerjson_file}"
 fi
 
 # Remotely build dev container for better perf if boostrap is not part of a compose
