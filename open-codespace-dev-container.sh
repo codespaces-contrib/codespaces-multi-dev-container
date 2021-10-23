@@ -38,7 +38,9 @@ cat << 'EOF' > "${temp_dir}/.gitignore"
 .
 EOF
 echo "Temp directory: ${temp_dir}"
-temp_devcontainer_folder="${temp_dir}/${devcontainer_relative_path}"
+devcontainer_folder_name="${devcontainer_relative_path//./_}"
+devcontainer_folder_name="${devcontainer_folder_name//\\/_}"
+temp_devcontainer_folder="${temp_dir}/${devcontainer_folder_name//\//_}"
 mkdir -p "${temp_devcontainer_folder}"
 echo "Temp dev container path: ${temp_devcontainer_folder}"
 
@@ -47,10 +49,12 @@ echo
 echo "Copying:"
 echo "- ${devcontainer_relative_path}/.devcontainer"
 docker cp -L "${bootstrap_container}:${workspace_folder_in_container}/${devcontainer_relative_path}/.devcontainer" "${temp_devcontainer_folder}"
-while IFS= read -r content_path; do
-    echo "- ${content_path}"
-    docker cp -L "${bootstrap_container}:${workspace_folder_in_container}/${content_path}" "${temp_dir}" 2>/dev/null || echo "   (Skipped, does not exist.)"
-done < common-config.list
+if [ -e "common-config.list" ]; then
+    while IFS= read -r content_path; do
+        echo "- ${content_path}"
+        docker cp -L "${bootstrap_container}:${workspace_folder_in_container}/${content_path}" "${temp_dir}" 2>/dev/null || echo "   (Skipped, does not exist.)"
+    done < common-config.list
+fi
 echo
 
 # Remove comments given devcontainer.json is a jsonc file
@@ -78,12 +82,19 @@ if [ -z "${COMPOSE_PROJECT_NAME}" ]; then
     echo "Building dev container..."
     docker exec -i ${bootstrap_container} /bin/sh -c "\
         cd ${workspace_folder_in_container}/${devcontainer_relative_path}; \
+        if ! type devcontainer > /dev/null 2>&1; then \
+            npm install -g @vscode/dev-container-cli; \
+        fi; \
         devcontainer build ."
 fi
 
 # Launch VS Code
 echo "Launching VS Code..."
-code --force-user-env --disable-workspace-trust --skip-add-to-recently-opened "${temp_devcontainer_folder}"
+if type devcontainer > /dev/null 2>&1; then
+    devcontainer open "${temp_devcontainer_folder}"
+else
+    code --force-user-env --disable-workspace-trust --skip-add-to-recently-opened "${temp_devcontainer_folder}"
+fi
 echo "Done!"
 echo
 echo "Press F1 or Cmd/Ctrl+Shift+P and select the Remote-Containers: Reopen in Container in the new VS Code window to connect."

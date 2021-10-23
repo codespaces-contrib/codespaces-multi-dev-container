@@ -30,7 +30,8 @@ if ($workspaceFolderInContainer -eq "unknown") {
 $tempDir = "$pwd/._devcontainer_temp"
 New-Item -ItemType Directory -Force -Path "$tempDir" > $null
 Write-Host "Temp directory: $tempDir"
-$tempDevContainerFolder="$tempDir\$devContainerRelativePath"
+$devcontainerFolderName = $devcontainerRelativePath -replace '[\./\\]', '_'
+$tempDevContainerFolder="$tempDir\$devcontainerFolderName"
 Write-Host "Temp dev container path: $tempDevContainerFolder"
 $tempGitIgnore = "
 *
@@ -49,13 +50,15 @@ Try {
     Write-Host "Failed to copy .devcontainer folder. Valid path?"
     exit 1
 }
-$commonConfigList = Get-Content -Path "$PSScriptRoot\common-config.list"
-ForEach ($contentPath in $commonConfigList) {
-    Write-Host "- $contentPath"
-    Try {
-        docker cp -L "${bootstrapContainer}:${workspaceFolderInContainer}/${contentPath}" "${tempDir}" 2>$null
-    } Catch {
-        Write-Host "   (Skipping $contentPath. Not found.)"
+if (Test-Path "$PSScriptRoot\common-config.list") {
+    $commonConfigList = Get-Content -Path "$PSScriptRoot\common-config.list"
+    ForEach ($contentPath in $commonConfigList) {
+        Write-Host "- $contentPath"
+        Try {
+            docker cp -L "${bootstrapContainer}:${workspaceFolderInContainer}/${contentPath}" "${tempDir}" 2>$null
+        } Catch {
+            Write-Host "   (Skipping $contentPath. Not found.)"
+        }
     }
 }
 Write-Host
@@ -85,13 +88,20 @@ if ($composeProjectName -eq "") {
     Write-Host "Building dev container..."
     docker exec -i ${bootstrapContainer} /bin/sh -c "\
         cd ${workspaceFolderInContainer}/${devcontainerRelativePath}; \
+        if ! type devcontainer > /dev/null 2>&1; then \
+            npm install -g @vscode/dev-container-cli; \
+        fi; \
         devcontainer build ."
 }
 
 # Launch VS Code
 Write-Host
 Write-Host "Launching VS Code..."
-code --force-user-env --disable-workspace-trust --skip-add-to-recently-opened "${tempDevContainerFolder}"
+if (Get-Command devcontainer >$null 2>&1) {
+    devcontainer open "${tempDevContainerFolder}"
+} else {
+    code --force-user-env --disable-workspace-trust --skip-add-to-recently-opened "${tempDevContainerFolder}"
+}
 Write-Host
 Write-Host "Press F1 or Cmd/Ctrl+Shift+P and select the Remote-Containers: Reopen in Container in the new VS Code window to connect."
 Write-Host
