@@ -2,7 +2,7 @@
 
 set -e
 
-SOURCE_SOCKET="/var/run/docker.sock"
+SOURCE_SOCKET="/var/run/docker-host.sock"
 TARGET_PORT="9256"
 
 # Wrapper function to only use sudo if not already root
