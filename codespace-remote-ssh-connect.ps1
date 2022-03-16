@@ -1,108 +1,67 @@
 param (
-    $devContainerRelativePath='.',
-    $dockerHostPort='9256',
-    $workspaceFolderInContainer='unknown'
+    $codespaceName="",
+    $workspaceFolderInContainer="/workspaces",
+    $codespaceUser="codespace"
 )
 
 $ErrorActionPreference = "Stop"
 
-$env:DOCKER_HOST = "tcp://localhost:$dockerHostPort"
 
-# Find boostrap container
-$bootstrapContainer = (docker ps -q --filter "label=com.github.codespaces.active.workspace=true") -join ''
-Write-Host "Boostrap container ID: $bootstrapContainer"
-
-# Set compose project name if one exists on boostrap container
-$composeProjectName = (docker inspect -f '{{ index .Config.Labels \"com.docker.compose.project\" }}' ${bootstrapContainer}) -join ''
-if ($composeProjectName -ne "" ) {
-    Write-Host "Compose project name: $composeProjectName"
-    $env:COMPOSE_PROJECT_NAME=$composeProjectName
+function Check-Command($command, $name) {
+    if (!Get-Command $command >$null 2>&1) {
+        Write-Host "Required command missing. $1 not found."
+        Write-Host "Please install $2 and ensure it is in the PATH."
+        exit 1
+    }
 }
 
-# Determine where workspace exists in boostrap container
-if ($workspaceFolderInContainer -eq "unknown") {
-    $workspaceFolderInContainer = (docker exec -i $bootstrapContainer /bin/sh -c "cat /tmp/__boostrap_container_workspace_folder") -join ''
-    Write-Host "Workspace folder in container: $workspaceFolderInContainer" 
-}
+Check-Command "gh" "the GitHub CLI"
+Check-Command "code" "VS Code"
+Check-Command "ssh" "an OpenSSH client"
 
-
-# Create a temp directory in the current folder - ensures we don't hit trusted workspace issues
-$tempDir = "$pwd/._devcontainer_temp"
-New-Item -ItemType Directory -Force -Path "$tempDir" > $null
-Write-Host "Temp directory: $tempDir"
-$devcontainerFolderName = $devcontainerRelativePath -replace '[\./\\]', '_'
-$tempDevContainerFolder="$tempDir\$devcontainerFolderName"
-Write-Host "Temp dev container path: $tempDevContainerFolder"
-$tempGitIgnore = "
-*
-.
-"
-[IO.File]::WriteAllText("$tempDir/.gitignore", $tempGitIgnore)
-
-# Copy config files
-New-Item -ItemType Directory -Force -Path "$tempDevContainerFolder" > $null
-Write-Host
-Write-Host "Copying:"
-Write-Host "- $devContainerRelativePath/.devcontainer"
-Try {
-    docker cp -L "${bootstrapContainer}:${workspaceFolderInContainer}/${devContainerRelativePath}/.devcontainer" "${tempDevContainerFolder}"
-} Catch {
-    Write-Host "Failed to copy .devcontainer folder. Valid path?"
+if ($codespaceName -eq "") {
+    Write-Host "Missing argument: codespace name."
+    Write-Host
+    WriteHost "Usage: codespace-remote-ssh-connect <codespace_name> [workspace_folder_in_container] [codespace_user]"
+    Write-Host 
+    Write-Host "Available codespaces:"
+    gh codespace list --json name -t '{{ range $i, $codespace := . }}{{ $codespace.name }}~{{ end }}' | tr '~' '\n' 
     exit 1
 }
-if (Test-Path "$PSScriptRoot\common-config.list") {
-    $commonConfigList = Get-Content -Path "$PSScriptRoot\common-config.list"
-    ForEach ($contentPath in $commonConfigList) {
-        Write-Host "- $contentPath"
-        Try {
-            docker cp -L "${bootstrapContainer}:${workspaceFolderInContainer}/${contentPath}" "${tempDir}" 2>$null
-        } Catch {
-            Write-Host "   (Skipping $contentPath. Not found.)"
-        }
-    }
-}
-Write-Host
 
-$tempDevContainerJsonFile = "$tempDevContainerFolder/.devcontainer/devcontainer.json"
-$devContainerJsonRaw = [IO.File]::ReadAllText($tempDevContainerJsonFile)
-# Remove comments given devcontainer.json is a jsonc file
-$devContainerJsonRaw = $devContainerJsonRaw -replace "//.*"," "
-$devContainerJson = ConvertFrom-Json -InputObject $devContainerJsonRaw
-# Append workspace mount property if not a docker compose definition
-if ($null -eq $devContainerJson.dockerComposeFile) {
-    # Find the workspace mount point on the host
-    $workspaceMountSource = (docker inspect -f '{{range .HostConfig.Mounts}}{{if eq .Target \"/workspaces\"}}{{.Source}}{{end}}{{end}}' ${bootstrapContainer}) -join ''
-    if ($workspaceMountSource -eq "") {
-        $workspaceMountSource = "/var/lib/docker/codespacemount/workspace"
-    }
-    Write-Host "Workspace mount source: ${workspaceMountSource}"
-    # Update devcontainer.json
-    Add-Member -InputObject $devContainerJson -Force -MemberType NoteProperty -Name "workspaceFolder" -Value "${workspaceFolderInContainer}/${devcontainerRelativePath}"
-    Add-Member -InputObject $devContainerJson -Force -MemberType NoteProperty -Name "workspaceMount" -Value "source=${workspaceMountSource},destination=/workspaces,type=bind"
-    [IO.File]::WriteAllText("${tempDevContainerJsonFile}", (ConvertTo-Json -InputObject $devContainerJson))
+$ghPath = (Get-Command "gh" -CommandType exe).Source
+$hostName = "${codespaceName}-multi-container"
+$sshConfigSnippet="# START CODESPACES ${hostName}
+Host ${hostName}
+	User ${codespaceUser}
+	ProxyCommand "${ghPath}" cs ssh -c ${codespaceName} --stdio
+	UserKnownHostsFile /dev/null
+    GlobalKnownHostsFile /dev/null
+	StrictHostKeyChecking no
+	ControlMaster auto
+# END CODESPACES ${hostName}
+"
+if (!Test-Path "${HOME}/.ssh/config" || !Get-Content "${HOME}/.ssh/config" | Select-String "Host $hostName" -casesensitive -quiet){
+    New-Item -ItemType Directory -Force -Path "${HOME}/.ssh" > $null
+    Add-Content "${HOME}/.ssh/config" "${sshConfigSnippet}"
 }
+fi
+Write-Host "Verifying Remote - SSH and Remote - Containers extensions are installed..."
+code --install-extension ms-vscode-remote.remote-ssh > /dev/null
+code --install-extension ms-vscode-remote.remote-containers > /dev/null
+Write-Host "Opening SSH connection to ${codespace_name} using Remote - SSH..."
+code --disable-workspace-trust --skip-add-to-recently-opened --remote ssh-remote+${host_name} "${workspace_folder_in_container}"
 
-# Remotely build dev container for better perf if boostrap is not part of a compose
-# definition (since in this case, the containers would already be built)
-if ($composeProjectName -eq "") {
-    Write-Host "Building dev container..."
-    docker exec -i ${bootstrapContainer} /bin/sh -c "\
-        cd ${workspaceFolderInContainer}/${devcontainerRelativePath}; \
-        if ! type devcontainer > /dev/null 2>&1; then \
-            npm install -g @vscode/dev-container-cli; \
-        fi; \
-        devcontainer build ."
-}
+Write-Host "
+Next:
 
-# Launch VS Code
-Write-Host
-Write-Host "Launching VS Code..."
-if (Get-Command devcontainer >$null 2>&1) {
-    devcontainer open "${tempDevContainerFolder}"
-} else {
-    code --force-user-env --disable-workspace-trust --skip-add-to-recently-opened "${tempDevContainerFolder}"
-}
-Write-Host
-Write-Host "Press F1 or Cmd/Ctrl+Shift+P and select the Remote-Containers: Reopen in Container in the new VS Code window to connect."
-Write-Host
+1. In the new Remote - SSH VS Code window that appears, start a new VS Code terminal.
+2. Run the following for each folder with a dev container you want to open: code <folder name>
+3. In each new window, click the "Reopen in Container" button in the notification that appears.
+4. Use each window as you would normally.
 
+"
+Read-Host "When done, press enter to remove the temporary SSH configurations or Ctrl+C to leave it in place."
+
+$sshConfig = Get-Content "${HOME}/.ssh/config" -replace "# START CODESPACES ${hostName}.*# END CODESPACES ${hostName}", ""
+[IO.File]::WriteAllText("${HOME}/.ssh/config", $sshConfig)
