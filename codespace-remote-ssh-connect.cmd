@@ -1,0 +1,1 @@
+@powershell -ExecutionPolicy remotesigned "%~dp0\codespace-remote-ssh-connect.ps1" %*

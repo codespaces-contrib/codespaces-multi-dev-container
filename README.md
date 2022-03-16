@@ -1,59 +1,72 @@
 # Using GitHub Codespaces with Multiple Development Containers
 
-Visual Studio Code Remote - Containers supports [a pattern](https://code.visualstudio.com/remote/advancedcontainers/connect-multiple-containers) that allows the use of multiple development containers at the same time for a source tree. Unfortunately [GitHub Codespaces](https://github.com/features/codespaces) does not currently support attaching a second window to a different container in the same Codespaces. However, the fact that the same technology is used in both Remote - Containers and Codespaces allows you to use the Remote - Containers extension with a codespace to achieve the same goal with some subtle tweaks.
+Visual Studio Code Remote - Containers supports the idea of connecting to multiple containers in the same source tree. There is even [a pattern](https://code.visualstudio.com/remote/advancedcontainers/connect-multiple-containers) if you are using Docker Compose for your configuration. Unfortunately [GitHub Codespaces](https://github.com/features/codespaces) does not currently support attaching a second window to a different container in the same Codespaces. However, the fact that the same technology is used in both Remote - Containers and Codespaces allows you to use the Remote - Containers extension with a codespace to achieve the same goal with some subtle tweaks.
 
-This variation of the pattern enables you to spin up completely separate dev containers in the same codespace without unifying everything in a single Docker Compose file. If you'd prefer to spin everything up at once using Docker Compose, [see this variation instead](https://github.com/chuxel/codespaces-multi-dev-container-compose).
+This repository includes a script that you can use to connect to multiple containers via the GitHub CLI and the Remote - Containers extension. Any dev container configuration files can be in sub-folders rather than the repository root.
 
 Codespaces will ultimately have first class support for this pattern, so this is a workaround given current limitations.
 
 ## Setup
 
-1. Install [VS Code](https://code.visualstudio.com/) (stable) locally
-2. Next, start VS Code and do the following:
-    1. Install the [GitHub Codespaces](https://marketplace.visualstudio.com/items?itemName=GitHub.codespaces) extension in local VS Code
-    2. Install the [VS Code Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension in local VS Code
-    3. Press <kbd>F1</kbd> or <kbd>ctrl</kbd>+<kbd>shift</kbd>+<kbd>p</kbd> and select **Remote-Containers: Install devcontainer CLI**
-3. Install the Docker CLI locally (e.g. by installing Docker Desktop, but Docker does not need to be running)
-4. On macOS or Linux, install `jq` locally:
-    - macOS: `brew install jq`
-    - Linux: Use your distro's package manger to install. For example, `sudo apt-get install jq`
+1. Install [VS Code](https://code.visualstudio.com/) (stable) locally.
+2. Install the [GitHub CLI](https://cli.github.com/) locally.
+3. Install an OpenSSH client and [configure an SSH key for use with GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/about-ssh).
 
 ## Using this sample
 
-1. Create a codespace from this repository from VS Code client locally (<kbd>F1</kbd> or <kbd>ctrl</kbd>+<kbd>shift</kbd>+<kbd>p</kbd>, select **Codesaces: Create New Codespace**, enter this repository)
-
-    > Note: If you accidentally created the codespace from the web, you can open it in VS Code client after things are up and running if you prefer.
-
-2. In this codespace, open a terminal and run the command: `keep-me-alive`
-
-3. On Windows, be sure the **Remote - Containers: Execute in WSL** user setting is **Unchecked** (`"remote.containers.executeInWSL": false` in `settings.json`).
-
-4. Next, copy `open-codespace-dev-container.sh` (macOS / Linux) or `open-codespace-dev-container.ps1` and `open-codespace-dev-container.cmd` (Windows) to your local machine.
-
-5. In a **local** terminal, use the script to set up a connection to one of the sub-folders in this repository. For example, on macOS / Linux:
+1. Create a codespace from this repository if you do not already have one. You can do this using the GitHub CLI as follows:
 
     ```bash
-    bash open-codespace-dev-container.sh container-1-src
+    gh codespace create --repo codespaces-contrib/codespaces-multi-dev-container
+    ```
+
+    Note the name of the codespace. If you have an existing codespace you want to use instead, you can find out its name by running:
+
+    ```bash
+    gh codespace list
+    ```
+
+2. Next, copy `codespace-remote-ssh-connect.sh` (macOS / Linux) or `codespace-remote-ssh-connect.ps1` and `codespace-remote-ssh-connect.cmd` (Windows) to your local machine.
+
+3. In a **local** terminal, use the script to set up a connection to the codespace. For example, on macOS / Linux (replacing <codespace-name> with the name from step 1):
+
+    ```bash
+    bash open-codespace-dev-container.sh <codespace-name>
     ```
 
     ... or on Windows, use PowerShell/Command Prompt (not WSL) as follows:
     ```powershell
-    .\open-codespace-dev-container.cmd container-1-src
+    .\open-codespace-dev-container.cmd <codespace-name>
     ```
 
-5. In the VS Code window that appears, click **Reopen in Container** when a notification appears.
+4. In the new Remote - SSH VS Code window that appears, start a new VS Code terminal.
 
-In a bit, this new window will be using the development container for this folder.
+5. Run the following for each folder with a dev container you want to open:
+
+    ```bash
+    code <folder name>
+    ```
+
+    For example:
+
+    ```bash
+    code codespaces-multi-dev-container/container-1-src
+    code codespaces-multi-dev-container/container-2-src
+    ```
+
+
+6. In each new window, click the "Reopen in Container" button in the notification that appears.
+
+7. After everything is up and running, use each window as you would normally.
 
 ## Adapting the sample for your own use
 
-This sample applies the same [patterns](https://code.visualstudio.com/remote/advancedcontainers/connect-multiple-containers) used in Remote - Containers for this same scenario. To adapt for your own use:
+To adapt for your own use:
 
-1. Make your own copy of this repository (or copy contents into an existing one) and add other sub-folders to your Codespace with dev container configuration. You can use the same command described above to access these by referencing the folder name.
-2. If your new container relies on contents outside of the `.devcontainer` folder (particularly if common across all containers), add them to `common-config.list` in the root of the repository. This ensures they are copied down locally so the build can function as expected.
-3. For multi-repo scenarios, you can setup the "bootstrap" container (in the root `.devcontainer` folder) to clone repositories as described in [this sample](https://github.com/Chuxel/codespaces-multi-repo) instead.
-
-Note that if you are using a Docker Compose file or would prefer to have all containers start up at once, see [this variation instead](https://github.com/chuxel/codespaces-multi-dev-container-compose) for an alternate approach.
+1. Make a copy of the appropriate `codespace-remote-ssh-connect-*.*` files on your local machine in a spot where you can use them. (You can optionally place them in other repositories to share with others, but this is not required).
+2. You do not need a custom container configuration in the root of your repository for this model to work. However, if your repository has a `.devcontainer` folder or `.devcontainer.json` file in the root of the repository with a custom image or Dockerfile, make sure the [docker-in-docker](https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/docker-in-docker.md) is included.
+3. Add your actual dev container configuration files to sub-folders in the repository rather than the repository root.
+4. Use the script as described above to access them.
 
 ## TODOs
 
