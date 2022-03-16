@@ -8,7 +8,7 @@ $ErrorActionPreference = "Stop"
 
 
 function Check-Command($command, $name) {
-    if (!Get-Command $command >$null 2>&1) {
+    if ((Get-Command $command 2>$null) -eq $null) {
         Write-Host "Required command missing. $1 not found."
         Write-Host "Please install $2 and ensure it is in the PATH."
         exit 1
@@ -29,28 +29,32 @@ if ($codespaceName -eq "") {
     exit 1
 }
 
-$ghPath = (Get-Command "gh" -CommandType exe).Source
+$ghPath = (Get-Command "gh").Source
 $hostName = "${codespaceName}-multi-container"
-$sshConfigSnippet="# START CODESPACES ${hostName}
+
+$sshConfigSnippet="
+# START CODESPACES ${hostName}
 Host ${hostName}
 	User ${codespaceUser}
-	ProxyCommand "${ghPath}" cs ssh -c ${codespaceName} --stdio
+	ProxyCommand ""${ghPath}"" cs ssh -c ${codespaceName} --stdio
 	UserKnownHostsFile /dev/null
     GlobalKnownHostsFile /dev/null
 	StrictHostKeyChecking no
 	ControlMaster auto
 # END CODESPACES ${hostName}
 "
-if (!Test-Path "${HOME}/.ssh/config" || !Get-Content "${HOME}/.ssh/config" | Select-String "Host $hostName" -casesensitive -quiet){
-    New-Item -ItemType Directory -Force -Path "${HOME}/.ssh" > $null
-    Add-Content "${HOME}/.ssh/config" "${sshConfigSnippet}"
+
+if ((Test-Path "${HOME}\.ssh\config") -ne $true -Or (Get-Content -Path "${HOME}\.ssh\config" | Select-String "Host ${hostName}" -casesensitive -quiet) -ne $true){
+    New-Item -ItemType Directory -Force -Path "${HOME}\.ssh" > $null
+    $sshConfig = Get-Content -Path "${HOME}\.ssh\config" -Raw
+    [IO.File]::WriteAllText("${HOME}\.ssh\config", ($sshConfig+$sshConfigSnippet -replace "`r`n", "`n"))
 }
-fi
+
 Write-Host "Verifying Remote - SSH and Remote - Containers extensions are installed..."
-code --install-extension ms-vscode-remote.remote-ssh > /dev/null
-code --install-extension ms-vscode-remote.remote-containers > /dev/null
+code --install-extension ms-vscode-remote.remote-ssh > $null
+code --install-extension ms-vscode-remote.remote-containers > $null
 Write-Host "Opening SSH connection to ${codespace_name} using Remote - SSH..."
-code --disable-workspace-trust --skip-add-to-recently-opened --remote ssh-remote+${host_name} "${workspace_folder_in_container}"
+code --disable-workspace-trust --skip-add-to-recently-opened --remote "ssh-remote+${hostName}" "${workspaceFolderInContainer}"
 
 Write-Host "
 Next:
@@ -61,7 +65,7 @@ Next:
 4. Use each window as you would normally.
 
 "
-Read-Host "When done, press enter to remove the temporary SSH configurations or Ctrl+C to leave it in place."
+Read-Host "When done, press enter to remove the temporary SSH configurations or Ctrl+C to leave it in place"
 
-$sshConfig = Get-Content "${HOME}/.ssh/config" -replace "# START CODESPACES ${hostName}.*# END CODESPACES ${hostName}", ""
-[IO.File]::WriteAllText("${HOME}/.ssh/config", $sshConfig)
+$sshConfig = (Get-Content "${HOME}\.ssh\config" -Raw) -replace "(?ms)# START CODESPACES ${hostName}\r?\n.*\r?\n# END CODESPACES ${hostName}", ""
+[IO.File]::WriteAllText("${HOME}\.ssh\config", ($sshConfig.Trim() -replace "`r`n", "`n"))
