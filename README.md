@@ -28,15 +28,15 @@ Codespaces will ultimately have first class support for this pattern, so this is
 
 2. Next, copy `codespace-remote-ssh-connect.sh` (macOS / Linux) or `codespace-remote-ssh-connect.ps1` and `codespace-remote-ssh-connect.cmd` (Windows) to your local machine.
 
-3. In a **local** terminal, use the script to set up a connection to the codespace. For example, on macOS / Linux (replacing <codespace-name> with the name from step 1):
+3. In a **local** terminal, use the script to set up a connection to the codespace. For example, on macOS / Linux (replacing &lt;codespace-name&gt; with the name from step 1):
 
     ```bash
-    bash open-codespace-dev-container.sh <codespace-name>
+    bash codespace-remote-ssh-connect.sh <codespace-name>
     ```
 
     ... or on Windows, use PowerShell/Command Prompt (not WSL) as follows:
     ```powershell
-    .\open-codespace-dev-container.cmd <codespace-name>
+    .\codespace-remote-ssh-connect.cmd <codespace-name>
     ```
 
 4. In the new Remote - SSH VS Code window that appears, start a new VS Code terminal.
