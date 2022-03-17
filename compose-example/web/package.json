@@ -1,0 +1,30 @@
+{
+  "name": "hello-june",
+  "description": "Hello June Web App",
+  "version": "0.0.1",
+  "private": true,
+  "license": "MIT",
+  "author": "Microsoft",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon -q"
+  },
+  "engines": {
+    "node": "16.14.0"
+  },
+  "dependencies": {
+    "ejs": "^3.0.1",
+    "express": "^4.17.1",
+    "killport": "^1.0.1",
+    "nodemon": "^2.0.2",
+    "pg": "^8.3.0",
+    "socket.io": "^2.3.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.16.0"
+  },
+  "nodemonConfig": {
+    "ext": "js,ejs"
+  }
+}

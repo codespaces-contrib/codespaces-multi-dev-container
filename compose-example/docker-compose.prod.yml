@@ -1,0 +1,15 @@
+version: '3.8'
+
+# This file contains settings specific to testing the production version of this app.
+
+services:
+  web:
+    ports:
+      - 3000:3000
+
+  db:
+    volumes:
+      - save-june-pgdata:/var/lib/postgresql/data
+
+volumes:
+  save-june-pgdata:

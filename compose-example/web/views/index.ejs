@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Haikus for June</title>
+    <link href="/css/main.css" rel="stylesheet" type="text/css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta property="og:title" content="Haikus for June" />
+    <meta
+      property="og:description"
+      content="Some of the best haikus you'll ever read about our rescue dog June"
+    />
+    <meta property="og:image" content="/images/sunlight.jpg" />
+    <script
+      src="https://code.jquery.com/jquery-3.4.1.min.js"
+      integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <h1>Haikus for June</h1>
+    <div>
+      <% for(var i=0; i < haikus.length; i++) { %>
+      <img class="june-images" src="images/<%= haikus[i].image %>" />
+      <div class="haiku-containers">
+        <p class="haikus"><%- haikus[i].haiku %></p>
+        <a type="button" id="<%= haikus[i].id %>" class="heart"
+          >❤️
+          <span class="heart-value"><%- haikus[i].hearts %></span>
+        </a>
+      </div>
+      <% } %>
+    </div>
+  </body>
+  <script src="https://cdn.jsdelivr.net/npm/socket.io-client@2.3.0/dist/socket.io.slim.js"></script>
+  <script>
+    $(function () {
+      $(".heart").click(function (e) {
+        let countElement = $(this).children(".heart-value");
+        countElement.html(parseInt(countElement.html(), 10) + 1);
+        $(this).addClass("clicked");
+        $.post("/heart", { id: e.currentTarget.id });
+      });
+    });
+
+    io().on("disconnect", () => location.reload());
+  </script>
+</html>

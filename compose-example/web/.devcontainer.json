@@ -1,0 +1,43 @@
+{
+    "name": "Haikus for june (Web)",
+    "workspaceFolder": "/workspace/web",
+    "dockerComposeFile": [
+        "../docker-compose.yml",
+        "../docker-compose.devcontainer.yml"
+    ],
+    "service": "web",
+    "runServices": [
+        "web",
+        "db"
+    ],
+    "remoteUser": "web",
+    "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+    ],
+    "forwardPorts": [
+        "db:5432"
+    ],
+    "portsAttributes": {
+        "3000": {
+            "label": "Web Application",
+            "onAutoForward": "notify"
+        },
+        "db:5432": {
+            "label": "Database",
+            "onAutoForward": "silent"
+        }
+    },
+    "postCreateCommand": "npm install",
+    "features": {
+        "common": {
+            "username": "web",
+            "upgradePackages": false,
+            "nonFreePackages": true
+        },
+        "chuxel/devcontainer-features/postgres": {
+            "version": "latest",
+            "clientOnly": true
+        }
+    }
+}

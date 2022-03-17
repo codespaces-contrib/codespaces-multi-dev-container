@@ -1,0 +1,35 @@
+version: '3.8'
+
+# This file contains settings specific developing inside the containers
+
+services:
+  web:
+    image: save-june-web-devcontainer
+    build:
+      context: web
+      dockerfile: Dockerfile
+      target: build-base
+    volumes:
+      - .:/workspace
+    command: sleep infinity
+
+  worker:
+    image: save-june-worker-devcontainer
+    build:
+      context: worker
+      dockerfile: Dockerfile
+      target: base
+    volumes:
+      - .:/workspace
+    command: sleep infinity
+
+  db:
+    # We could also add a volume mount for the data like production.
+    # But in this case, we'll just continue to reuse fresh test data
+    # each time the postgres container is created.
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+
+volumes:
+  save-june-postgres-logs:

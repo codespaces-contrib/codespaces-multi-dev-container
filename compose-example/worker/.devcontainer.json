@@ -1,0 +1,30 @@
+{
+    "name": "Haikus for june (Worker)",
+    "workspaceFolder": "/workspace/worker",
+    "dockerComposeFile": [
+        "../docker-compose.yml",
+        "../docker-compose.devcontainer.yml"
+    ],
+    "service": "worker",
+    "runServices": ["worker", "db"],
+    "remoteUser": "worker",
+    "portsAttributes": {
+        "8080": {
+            "label": "Worker",
+            "onAutoForward": "notify"
+        }
+    },
+    "postCreateCommand": "go get",
+    "features": {
+        "common": {
+            "username": "worker",
+            "upgradePackages": false,
+            "nonFreePackages": true
+        },
+        "chuxel/devcontainer-features/postgres": {
+            "version": "latest",
+            "clientOnly": true
+        },
+        "golang": "1.17.7"
+    }
+}

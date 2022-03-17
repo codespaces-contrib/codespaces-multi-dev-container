@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "pwa-node",
+      "request": "launch",
+      "name": "Launch Program",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["nodemon", "-q"],
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ]
+}
