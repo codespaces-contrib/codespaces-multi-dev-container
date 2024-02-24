@@ -46,6 +46,9 @@ Host ${hostName}
 
 if ((Test-Path "${HOME}\.ssh\config") -ne $true -Or (Get-Content -Path "${HOME}\.ssh\config" | Select-String "Host ${hostName}" -casesensitive -quiet) -ne $true){
     New-Item -ItemType Directory -Force -Path "${HOME}\.ssh" > $null
+    if ((Test-Path "${HOME}\.ssh\config") -ne $true) {
+        New-Item -ItemType File -Force -Path "${HOME}\.ssh\config" > $null
+    }
     $sshConfig = Get-Content -Path "${HOME}\.ssh\config" -Raw
     [IO.File]::WriteAllText("${HOME}\.ssh\config", ($sshConfig+$sshConfigSnippet -replace "`r`n", "`n"))
 }
